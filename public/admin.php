@@ -10,9 +10,12 @@ $formBody = '';
 $formPublishedAt = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $formTitle = trim($_POST['title'] ?? '');
-    $formBody = trim($_POST['body'] ?? '');
-    $formPublishedAt = trim($_POST['published_at'] ?? '');
+    $rawTitle = $_POST['title'] ?? '';
+    $rawBody = $_POST['body'] ?? '';
+    $rawPublishedAt = $_POST['published_at'] ?? '';
+    $formTitle = is_string($rawTitle) ? trim($rawTitle) : '';
+    $formBody = is_string($rawBody) ? trim($rawBody) : '';
+    $formPublishedAt = is_string($rawPublishedAt) ? trim($rawPublishedAt) : '';
 
     if ($formTitle === '' || $formBody === '') {
         $error = 'Title and body are required.';
@@ -33,7 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$search = trim($_GET['q'] ?? '');
+$rawSearch = $_GET['q'] ?? '';
+$search = is_string($rawSearch) ? trim($rawSearch) : '';
 $docs = search_documents_by_title($search);
 
 render_header('Admin', $staff);

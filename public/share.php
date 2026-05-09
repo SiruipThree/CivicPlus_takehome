@@ -4,7 +4,8 @@ require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
 
 $staff = current_staff();
-$docRef = trim((string) ($_GET['doc'] ?? ''));
+$rawDoc = $_GET['doc'] ?? '';
+$docRef = is_string($rawDoc) ? trim($rawDoc) : '';
 $doc = find_document_by_reference($docRef);
 
 if (!$doc) {
@@ -24,10 +25,11 @@ $created_token = null;
 $schedulePublishedAtInput = format_utc_for_datetime_local($doc['published_at']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? 'share';
+    $rawAction = $_POST['action'] ?? 'share';
+    $action = is_string($rawAction) ? $rawAction : 'share';
 
     if ($action === 'schedule') {
-        $schedulePublishedAtInput = trim($_POST['published_at'] ?? '');
+        $schedulePublishedAtInput = trim((string) ($_POST['published_at'] ?? ''));
         try {
             $publishedAt = parse_datetime_local_to_utc($schedulePublishedAtInput);
             update_document_schedule((int) $doc['id'], $publishedAt);
@@ -37,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (InvalidArgumentException $e) {
             $error = $e->getMessage();
         }
-    } else {
-        $email = trim($_POST['email'] ?? '');
+    } elseif ($action === 'share') {
+        $email = trim((string) ($_POST['email'] ?? ''));
         if ($email === '') {
             $error = 'Recipient email is required.';
         } else {
@@ -48,6 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = $e->getMessage();
             }
         }
+    } else {
+        $error = 'Unknown action.';
     }
 }
 

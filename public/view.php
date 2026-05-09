@@ -3,7 +3,8 @@
 require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
 
-$token = $_GET['token'] ?? '';
+$rawToken = $_GET['token'] ?? '';
+$token = is_string($rawToken) ? $rawToken : '';
 
 $doc = recipient_document_for_token($token);
 

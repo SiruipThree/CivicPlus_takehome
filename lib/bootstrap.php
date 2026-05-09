@@ -206,7 +206,7 @@ function create_document(string $title, string $body, int $staffId, ?string $pub
         'title' => $title,
         'readable_id' => $readableId,
         'published_at' => $publishedAt,
-    ]);
+    ], $staffId);
 
     return $docId;
 }
@@ -328,14 +328,14 @@ function current_staff(): array {
     return $row;
 }
 
-function audit_log(string $action, string $entity_type, int $entity_id, array $details = []): void {
-    $staff = current_staff();
+function audit_log(string $action, string $entity_type, int $entity_id, array $details = [], ?int $staffId = null): void {
+    $staffId = $staffId ?? (int) current_staff()['id'];
     $stmt = db()->prepare('
         INSERT INTO audit_log (staff_id, action, entity_type, entity_id, details)
         VALUES (?, ?, ?, ?, ?)
     ');
     $stmt->execute([
-        $staff['id'],
+        $staffId,
         $action,
         $entity_type,
         $entity_id,
